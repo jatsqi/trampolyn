@@ -20,7 +20,7 @@ ELSEIF(CMAKE_SYSTEM_PROCESSOR STREQUAL "Windows")
     set(TRAMPOLYN_SYSTEM_NAME "Windows")
     set(TRAMPOLYN_IS_WINDOWS TRUE)
 ELSE()
-    message(FATAL_ERROR "Unknown system architecture.")
+    message(FATAL_ERROR "Unknown OS.")
 ENDIF()
 message(STATUS "Detected OS: ${TRAMPOLYN_SYSTEM_NAME}")
 
