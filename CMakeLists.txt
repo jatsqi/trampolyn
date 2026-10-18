@@ -48,5 +48,6 @@ ELSE()
 endif()
 message(STATUS "Detected architecture: ${TRAMPOLYN_SYSTEM_ARCH}")
 
-add_subdirectory(src)
+add_subdirectory(libcppelf)
+add_subdirectory(libtrampolyn)
 add_subdirectory(cli)
