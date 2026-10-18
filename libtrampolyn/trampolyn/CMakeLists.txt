@@ -18,7 +18,6 @@ add_library(libtrampolyn SHARED)
 target_link_libraries(libtrampolyn
     PUBLIC
         libtrampolyn_objlib
-    PRIVATE
         libtrampolyn_elf_objlib
 )
 
@@ -26,6 +25,5 @@ add_library(libtrampolyn_static)
 target_link_libraries(libtrampolyn_static
     PUBLIC
         libtrampolyn_objlib
-    PRIVATE
         libtrampolyn_elf_objlib
 )

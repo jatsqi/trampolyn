@@ -1,6 +1,7 @@
 # Source files for ELF sublib
 list(APPEND TRAMPOLYN_ELF_SOURCE_FILES
     ElfReader.cpp
+    ElfTypes.cpp
 )
 
 # Add objlib for linking with other targets
