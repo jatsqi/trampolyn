@@ -87,6 +87,9 @@ static_assert(sizeof(Elf64Header) == 64);
  * Layout of a single ELF 32 symbol table entry.
  */
 struct Elf32Symbol {
+    unsigned char type() const { return info & 0x0F; }
+    unsigned char binding() const { return info >> 4; }
+
     Elf32_Word nameIdx;
     Elf32_Addr value;
     Elf32_Word size;
@@ -99,6 +102,9 @@ struct Elf32Symbol {
  * Layout of a single ELF 64 symbol table entry.
  */
 struct Elf64Symbol {
+    unsigned char type() const { return info & 0x0F; }
+    unsigned char binding() const { return info >> 4; }
+
     Elf64_Word nameIdx;
     unsigned char info;
     unsigned char other;

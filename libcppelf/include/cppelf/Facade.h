@@ -2,6 +2,7 @@
 #define TRAMPOLYN_CPPELF_FACADE_H
 
 #include "cppelf/ElfTypes.h"
+#include "cppelf/Enums.h"
 #include "cppelf/Flags.h"
 
 #include <cstdint>
@@ -11,7 +12,7 @@ namespace cppelf {
 
 class ElfHeaderIdent {
 public:
-    ElfHeaderIdent(const layout::ElfHeaderIdent &ident)
+    explicit ElfHeaderIdent(const layout::ElfHeaderIdent &ident)
         : magic_({.mag0_ = ident.magic_.mag0_,
                   .mag1_ = ident.magic_.mag1_,
                   .mag2_ = ident.magic_.mag2_,
@@ -48,7 +49,7 @@ public:
     template <typename T>
         requires std::is_same_v<T, layout::Elf32Header> ||
                      std::is_same_v<T, layout::Elf64Header>
-    ElfHeader(const T &header)
+    explicit ElfHeader(const T &header)
         : ident_(header.ident), type_(header.type), machine_(header.machine),
           version_(header.version), entry_(header.entry), phoff_(header.phoff),
           shoff_(header.shoff), flags_(header.flags), ehsize_(header.ehsize),
@@ -90,6 +91,17 @@ private:
 
 class ElfSectionHeader {
 public:
+    template <typename T>
+        requires std::is_same_v<T, layout::Elf32SectionHeader> ||
+                     std::is_same_v<T, layout::Elf64SectionHeader>
+    explicit ElfSectionHeader(const T &header)
+        : nameIdx_(header.nameIdx),
+          type_(static_cast<ElfSectionType>(header.type)), flags_(header.flags),
+          addr_(header.addr), offset_(header.offset), size_(header.size_),
+          link_(header.link), info_(header.info),
+          addressAlign_(header.addressAlign), entrySize_(header.entrySize) {}
+
+public:
     Elf_Word nameIndex() const { return nameIdx_; }
     ElfSectionType type() const { return type_; }
     Elf_XWord flags() const { return flags_; }
@@ -116,12 +128,23 @@ private:
 
 class ElfSymbol {
 public:
+    template <typename T>
+        requires std::is_same_v<T, layout::Elf32Symbol> ||
+                     std::is_same_v<T, layout::Elf64Symbol>
+    explicit ElfSymbol(const T &symbol)
+        : nameIdx_(symbol.nameIdx), types_(symbol.type()),
+          bindings_(symbol.binding()) {}
+
+public:
     Elf_Word nameIndex() const { return nameIdx_; }
     const Flags<ElfSymbolType> &types() const { return types_; }
     const Flags<ElfSymbolBinding> &bindings() const { return bindings_; }
 
 private:
     Elf_Word nameIdx_;
+
+    // TODO: type() and binding() ARE NOT BITMASKS AT THE MOMENT SO THIS IS
+    //       WRONG
     Flags<ElfSymbolType> types_;
     Flags<ElfSymbolBinding> bindings_;
 };
