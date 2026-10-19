@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <stdexcept>
 #include <string_view>
 #include <type_traits>
 #include <vector>
@@ -15,22 +14,12 @@ namespace cppelf::layout {
  *
  * @note The structure of the ident part is identical for 32 bits and 64 bits.
  */
-class ElfHeaderIdent {
-public:
-    ElfClass classs() const { return static_cast<ElfClass>(class_); }
-    ElfEndianess dataEncoding() const {
-        return static_cast<ElfEndianess>(dataEncoding_);
-    }
-    uint8_t version() const { return version_; }
-    uint8_t osABI() const { return osABI_; }
-    uint8_t osABIVersion() const { return osABIVersion_; }
-
+struct ElfHeaderIdent {
     bool validateMagic() const {
         return magic_.mag0_ == 0x7f && magic_.mag1_ == 'E' &&
                magic_.mag2_ == 'L' && magic_.mag3_ == 'F';
     }
 
-private:
     struct {
         uint8_t mag0_;
         uint8_t mag1_;
@@ -51,36 +40,20 @@ static_assert(std::is_trivially_copyable_v<ElfHeaderIdent>);
  * Layout the ELF 32 bit header.
  */
 class Elf32Header {
-public:
-    const ElfHeaderIdent &ident() const { return ident_; }
-    Elf32_Half type() const { return type_; }
-    Elf32_Half machine() const { return machine_; }
-    Elf32_Word version() const { return version_; }
-    Elf32_Off programHeaderOffset() const { return phoff_; }
-    Elf32_Off sectionHeaderOffset() const { return shoff_; }
-    Elf32_Word flags() const { return flags_; }
-    Elf32_Half headerSize() const { return ehsize_; }
-    Elf32_Half programHeaderEntrySize() const { return phentsize_; }
-    Elf32_Half programHeaderNumEntries() const { return phnum_; }
-    Elf32_Half sectionHeaderSize() const { return shentsize_; }
-    Elf32_Half sectionHeaderNumEntries() const { return shnum_; }
-    Elf32_Half stringTableIdxInSectionHeader() const { return ehsize_; }
-
-private:
-    ElfHeaderIdent ident_;
-    Elf32_Half type_;
-    Elf32_Half machine_;
-    Elf32_Word version_;
-    Elf32_Addr entry_;
-    Elf32_Off phoff_;
-    Elf32_Off shoff_;
-    Elf32_Word flags_;
-    Elf32_Half ehsize_;
-    Elf32_Half phentsize_;
-    Elf32_Half phnum_;
-    Elf32_Half shentsize_;
-    Elf32_Half shnum_;
-    Elf32_Half shstrndx_;
+    ElfHeaderIdent ident;
+    Elf32_Half type;
+    Elf32_Half machine;
+    Elf32_Word version;
+    Elf32_Addr entry;
+    Elf32_Off phoff;
+    Elf32_Off shoff;
+    Elf32_Word flags;
+    Elf32_Half ehsize;
+    Elf32_Half phentsize;
+    Elf32_Half phnum;
+    Elf32_Half shentsize;
+    Elf32_Half shnum;
+    Elf32_Half shstrndx;
 };
 static_assert(std::is_trivially_copyable_v<Elf32Header>);
 static_assert(sizeof(Elf32Header) == 52);
@@ -88,82 +61,112 @@ static_assert(sizeof(Elf32Header) == 52);
 /**
  * Layout the ELF 64 bit header.
  */
-class Elf64Header {
-public:
-    const ElfHeaderIdent &ident() const { return ident_; }
-    Elf64_Half type() const { return type_; }
-    Elf64_Half machine() const { return machine_; }
-    Elf64_Word version() const { return version_; }
-    Elf64_Off programHeaderOffset() const { return phoff_; }
-    Elf64_Off sectionHeaderOffset() const { return shoff_; }
-    Elf64_Word flags() const { return flags_; }
-    Elf64_Half headerSize() const { return ehsize_; }
-    Elf64_Half programHeaderEntrySize() const { return phentsize_; }
-    Elf64_Half programHeaderNumEntries() const { return phnum_; }
-    Elf64_Half sectionHeaderSize() const { return shentsize_; }
-    Elf64_Half sectionHeaderNumEntries() const { return shnum_; }
-    Elf64_Half stringTableIdxInSectionHeader() const { return ehsize_; }
-
-private:
-    ElfHeaderIdent ident_;
-    Elf64_Half type_;
-    Elf64_Half machine_;
-    Elf64_Word version_;
-    Elf64_Addr entry_;
-    Elf64_Off phoff_;
-    Elf64_Off shoff_;
-    Elf64_Word flags_;
-    Elf64_Half ehsize_;
-    Elf64_Half phentsize_;
-    Elf64_Half phnum_;
-    Elf64_Half shentsize_;
-    Elf64_Half shnum_;
-    Elf64_Half shstrndx_;
+struct Elf64Header {
+    ElfHeaderIdent ident;
+    Elf64_Half type;
+    Elf64_Half machine;
+    Elf64_Word version;
+    Elf64_Addr entry;
+    Elf64_Off phoff;
+    Elf64_Off shoff;
+    Elf64_Word flags;
+    Elf64_Half ehsize;
+    Elf64_Half phentsize;
+    Elf64_Half phnum;
+    Elf64_Half shentsize;
+    Elf64_Half shnum;
+    Elf64_Half shstrndx;
 };
 static_assert(std::is_trivially_copyable_v<Elf64Header>);
 static_assert(sizeof(Elf64Header) == 64);
 
 /**
+ * Layout of a single ELF 32 symbol table entry.
+ */
+struct Elf32Symbol {
+    Elf32_Word nameIdx;
+    Elf32_Addr value;
+    Elf32_Word size;
+    unsigned char info;
+    unsigned char other;
+    Elf32_Half sectionHeaderTableIdx;
+};
+
+/**
+ * Layout of a single ELF 64 symbol table entry.
+ */
+struct Elf64Symbol {
+    Elf64_Word nameIdx;
+    unsigned char info;
+    unsigned char other;
+    Elf64_Half sectionHeaderTableIdx;
+    Elf64_Addr value;
+    Elf64_XWord size;
+};
+
+/**
+ * Layout of a ELF 32 relocation entry without addend.
+ */
+struct Elf32Relocation {
+    Elf32_Word symbolTableIndex() const { return info >> 8; }
+    unsigned char type() const { return info & 0xFF; }
+
+    Elf32_Addr offset;
+    Elf32_Word info;
+};
+
+/**
+ * Layout of a ELF 32 relocation entry with addend.
+ */
+struct Elf32RelocationWithAddend : public Elf32Relocation {
+    Elf32_Sword addend;
+};
+
+/**
+ * Layout of a ELF 64 relocation entry without addend.
+ */
+struct Elf64Relocation {
+    Elf64_XWord symbolTableIndex() const { return info >> 32; }
+    Elf64_XWord type() const { return info & 0xFFFFFFFFull; }
+
+    Elf64_Addr offset;
+    Elf64_XWord info;
+};
+
+/**
+ * Layout of a ELF 64 relocation entry with addend.
+ */
+struct Elf64RelocationWithAddend : public Elf64Relocation {
+    Elf64_SXWord addend;
+};
+
+/**
  * Layout the ELF 32 bit section header.
  */
-class Elf32SectionHeader {
-public:
+struct Elf32SectionHeader {
     static constexpr Elf32_Word ProcessorTypeRange[2] = {0x70000000,
                                                          0x7fffffff};
     static constexpr Elf32_Word ApplicationTypeRange[2] = {0x80000000,
                                                            0xffffffff};
 
-public:
-    Elf32_Word nameIndex() const { return nameIdx_; }
-    ElfSectionType type() const { return static_cast<ElfSectionType>(type_); }
-    Elf32_Word flags() const { return flags_; }
-    Elf32_Addr address() const { return addr_; }
-    Elf32_Off offset() const { return offset_; }
-    Elf32_Word size() const { return size_; }
-    Elf32_Word link() const { return link_; }
-    Elf32_Word info() const { return info_; }
-    Elf32_Word addressAlign() const { return addressAlign_; }
-    Elf32_Word entrySize() const { return entrySize_; }
-
     bool isProcessorReservedSection() const {
-        return type_ >= ProcessorTypeRange[0] && type_ <= ProcessorTypeRange[1];
+        return type >= ProcessorTypeRange[0] && type <= ProcessorTypeRange[1];
     }
     bool isApplicationReservedSection() const {
-        return type_ >= ApplicationTypeRange[0] &&
-               type_ <= ApplicationTypeRange[1];
+        return type >= ApplicationTypeRange[0] &&
+               type <= ApplicationTypeRange[1];
     }
 
-private:
-    Elf32_Word nameIdx_;
-    Elf32_Word type_;
-    Elf32_Word flags_;
-    Elf32_Addr addr_;
-    Elf32_Off offset_;
-    Elf32_Word size_;
-    Elf32_Word link_;
-    Elf32_Word info_;
-    Elf32_Word addressAlign_;
-    Elf32_Word entrySize_;
+    Elf32_Word nameIdx;
+    Elf32_Word type;
+    Elf32_Word flags;
+    Elf32_Addr addr;
+    Elf32_Off offset;
+    Elf32_Word size;
+    Elf32_Word link;
+    Elf32_Word info;
+    Elf32_Word addressAlign;
+    Elf32_Word entrySize;
 };
 static_assert(std::is_trivially_copyable_v<Elf32SectionHeader>);
 static_assert(sizeof(Elf32SectionHeader) == 40);
@@ -171,44 +174,30 @@ static_assert(sizeof(Elf32SectionHeader) == 40);
 /**
  * Layout the ELF 64 bit section header.
  */
-class Elf64SectionHeader {
-public:
+struct Elf64SectionHeader {
     static constexpr Elf32_Word ApplicationTypeRange[2] = {0x60000000,
                                                            0x6FFFFFFF};
     static constexpr Elf32_Word ProcessorTypeRange[2] = {0x70000000,
                                                          0x7fffffff};
 
-public:
-    Elf64_Word nameIndex() const { return nameIdx_; }
-    ElfSectionType type() const { return static_cast<ElfSectionType>(type_); }
-    Elf64_XWord flags() const { return flags_; }
-    Elf64_Addr address() const { return addr_; }
-    Elf64_Off offset() const { return offset_; }
-    Elf64_XWord size() const { return size_; }
-    Elf64_Word link() const { return link_; }
-    Elf64_Word info() const { return info_; }
-    Elf64_XWord addressAlign() const { return addressAlign_; }
-    Elf64_XWord entrySize() const { return entrySize_; }
-
     bool isProcessorReservedSection() const {
-        return type_ >= ProcessorTypeRange[0] && type_ <= ProcessorTypeRange[1];
+        return type >= ProcessorTypeRange[0] && type <= ProcessorTypeRange[1];
     }
     bool isApplicationReservedSection() const {
-        return type_ >= ApplicationTypeRange[0] &&
-               type_ <= ApplicationTypeRange[1];
+        return type >= ApplicationTypeRange[0] &&
+               type <= ApplicationTypeRange[1];
     }
 
-private:
-    Elf64_Word nameIdx_;
-    Elf64_Word type_;
-    Elf64_XWord flags_;
-    Elf64_Addr addr_;
-    Elf64_Off offset_;
-    Elf64_XWord size_;
-    Elf64_Word link_;
-    Elf64_Word info_;
-    Elf64_XWord addressAlign_;
-    Elf64_XWord entrySize_;
+    Elf64_Word nameIdx;
+    Elf64_Word type;
+    Elf64_XWord flags;
+    Elf64_Addr addr;
+    Elf64_Off offset;
+    Elf64_XWord size;
+    Elf64_Word link;
+    Elf64_Word info;
+    Elf64_XWord addressAlign;
+    Elf64_XWord entrySize;
 };
 static_assert(std::is_trivially_copyable_v<Elf64SectionHeader>);
 static_assert(sizeof(Elf64SectionHeader) == 64);
