@@ -45,11 +45,37 @@ enum class ElfSectionType : uint8_t {
 /**
  * An ELF section can carry a number of flags.
  */
-enum class ElfSectionFlag : Elf64_XWord {
+enum class ElfSectionFlag : Elf_XWord {
     Write = 0x1, // Section should be writable during program execution.
     Alloc = 0x2, // Section occupies memory during program execution.
     ExecutableInstructions = 0x4, // Section contains executable instructions.
     MaskForProcessorReservedFlags = 0xf0000000
+};
+
+/**
+ * An ELF symbol is associated with one or more bindings.
+ */
+enum class ElfSymbolBinding : Elf_XWord {
+    Local = 0,
+    Global = 1,
+    Weak = 2,
+
+    ProcessorSpecific = UINT64_MAX - 1,
+    EnvironmentSpecific = UINT64_MAX
+};
+
+/**
+ * An ELF symbol has a unique type.
+ */
+enum class ElfSymbolType : Elf_XWord {
+    NoType = 0,
+    Object = 1,
+    Function = 2,
+    Section = 3,
+    SourceFile = 4,
+
+    ProcessorSpecific = UINT64_MAX - 1,
+    EnvironmentSpecific = UINT64_MAX
 };
 
 } // namespace cppelf
