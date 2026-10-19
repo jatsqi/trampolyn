@@ -1,3 +1,6 @@
+#ifndef TRAMPOLYN_CPPELF_TYPEDEFS_H
+#define TRAMPOLYN_CPPELF_TYPEDEFS_H
+
 #include <cstdint>
 
 namespace cppelf {
@@ -25,3 +28,5 @@ using Elf_XWord = Elf64_XWord;
 using Elf_SXWord = Elf64_SXWord;
 
 } // namespace cppelf
+
+#endif

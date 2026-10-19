@@ -1,3 +1,6 @@
+#ifndef TRAMPOLYN_CPPELF_FLAGS_H
+#define TRAMPOLYN_CPPELF_FLAGS_H
+
 #include <bitset>
 #include <cstddef>
 #include <type_traits>
@@ -35,3 +38,5 @@ private:
 };
 
 } // namespace cppelf
+
+#endif

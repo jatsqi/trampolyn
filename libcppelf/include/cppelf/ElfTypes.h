@@ -1,3 +1,6 @@
+#ifndef TRAMPOLYN_CPPELF_ELFTYPES_H
+#define TRAMPOLYN_CPPELF_ELFTYPES_H
+
 #include "cppelf/Enums.h"
 #include "cppelf/TypeDefs.h"
 
@@ -216,3 +219,5 @@ private:
 };
 
 } // namespace cppelf::layout
+
+#endif

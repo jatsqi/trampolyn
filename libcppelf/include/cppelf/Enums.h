@@ -1,3 +1,6 @@
+#ifndef TRAMPOLYN_CPPELF_ENUMS_H
+#define TRAMPOLYN_CPPELF_ENUMS_H
+
 #include "cppelf/TypeDefs.h"
 
 #include <cstdint>
@@ -79,3 +82,5 @@ enum class ElfSymbolType : Elf_XWord {
 };
 
 } // namespace cppelf
+
+#endif
