@@ -10,6 +10,21 @@
 
 namespace cppelf {
 
+template<ElfClass EClass>
+struct ElfClassToTypes;
+
+template<>
+struct ElfClassToTypes<ElfClass::ELF32> {
+    using HeaderType = layout::Elf32Header;
+    using SectionHeaderType = layout::Elf32SectionHeader;
+};
+
+template<>
+struct ElfClassToTypes<ElfClass::ELF64> {
+    using HeaderType = layout::Elf64Header;
+    using SectionHeaderType = layout::Elf64SectionHeader;
+};
+
 class ElfHeaderIdent {
 public:
     explicit ElfHeaderIdent(const layout::ElfHeaderIdent &ident)
@@ -132,20 +147,28 @@ public:
         requires std::is_same_v<T, layout::Elf32Symbol> ||
                      std::is_same_v<T, layout::Elf64Symbol>
     explicit ElfSymbol(const T &symbol)
-        : nameIdx_(symbol.nameIdx), types_(symbol.type()),
+        : nameIdx_(symbol.nameIdx),
+          type_(static_cast<ElfSymbolType>(symbol.type())),
           bindings_(symbol.binding()) {}
 
 public:
     Elf_Word nameIndex() const { return nameIdx_; }
-    const Flags<ElfSymbolType> &types() const { return types_; }
+    ElfSymbolType type() const { return type_; }
     const Flags<ElfSymbolBinding> &bindings() const { return bindings_; }
+
+    bool isLocal() const { return bindings_.check(ElfSymbolBinding::Local); }
+    bool isGlobal() const { return bindings_.check(ElfSymbolBinding::Global); }
+    bool isWeak() const { return bindings_.check(ElfSymbolBinding::Weak); }
+
+    bool hasType() const { return type_ != ElfSymbolType::NoType; }
+    bool isObject() const { return type_ == ElfSymbolType::Object; }
+    bool isFunction() const { return type_ == ElfSymbolType::Function; }
+    bool isSection() const { return type_ == ElfSymbolType::Section; }
+    bool isSourceFile() const { return type_ == ElfSymbolType::SourceFile; }
 
 private:
     Elf_Word nameIdx_;
-
-    // TODO: type() and binding() ARE NOT BITMASKS AT THE MOMENT SO THIS IS
-    //       WRONG
-    Flags<ElfSymbolType> types_;
+    ElfSymbolType type_;
     Flags<ElfSymbolBinding> bindings_;
 };
 
