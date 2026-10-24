@@ -36,15 +36,16 @@ ElfClassFileReader<EClass>::readSectionHeaders() const {
 }
 
 template <ElfClass EClass>
-std::span<const char> ElfClassFileReader<EClass>::readBlob(size_t offset,
+std::vector<char> ElfClassFileReader<EClass>::readRawData(size_t offset,
                                                            size_t size) const {
     std::ifstream stream(path_.data(),
                          std::ios_base::in | std::ios_base::binary);
     std::vector<char> storage(size);
+    stream.seekg(offset, std::ios_base::beg);
     stream.read(storage.data(), size);
-    blobs_.push_back(std::move(storage));
+    stream.close();
 
-    return std::span<const char>(blobs_.back().data(), size);
+    return storage;
 }
 
 template <ElfClass EClass> void ElfClassFileReader<EClass>::discoverLayout() {
@@ -53,13 +54,13 @@ template <ElfClass EClass> void ElfClassFileReader<EClass>::discoverLayout() {
 
     // Reader header
     LayoutHeaderType header;
-    stream.read(reinterpret_cast<char *>(&header), sizeof(header));
+    stream.read(reinterpret_cast<char *>(&header), sizeof(LayoutHeaderType));
     header_ = ElfHeader(header);
 
     // Read section headers
     std::vector<LayoutSectionHeaderType> sections;
     sections.resize(header_->sectionHeaderNumEntries());
-    stream.seekg(header_->sectionHeaderOffset());
+    stream.seekg(header_->sectionHeaderOffset(), std::ios_base::beg);
     stream.read(reinterpret_cast<char *>(sections.data()),
                 sizeof(LayoutSectionHeaderType) *
                     header_->sectionHeaderNumEntries());
