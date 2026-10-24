@@ -16,4 +16,19 @@ std::string_view ElfStringTableSectionView::lookup(size_t index) const {
     return std::string_view(ptr, std::strlen(ptr));
 }
 
+template <ElfClass EClass>
+ElfSymbolTableSectionView<EClass>::ElfSymbolTableSectionView(
+    std::span<const char> data)
+    : data_(data) {}
+
+template <ElfClass EClass>
+ElfSymbol<EClass>
+ElfSymbolTableSectionView<EClass>::lookup(size_t index) const {
+    return *reinterpret_cast<const ElfSymbol<EClass> *>(
+        data_.data() + sizeof(ElfSymbol<EClass>) * index);
+}
+
+template class ElfSymbolTableSectionView<Elf32>;
+template class ElfSymbolTableSectionView<Elf64>;
+
 } // namespace cppelf::layout

@@ -95,13 +95,14 @@ public:
         requires std::is_same_v<T, layout::Elf32SectionHeader> ||
                      std::is_same_v<T, layout::Elf64SectionHeader>
     explicit ElfSectionHeader(const T &header)
-        : nameIdx_(header.nameIdx),
+        : class_(layoutClassToElfClass(header)), nameIdx_(header.nameIdx),
           type_(static_cast<ElfSectionType>(header.type)), flags_(header.flags),
           addr_(header.addr), offset_(header.offset), size_(header.size),
           link_(header.link), info_(header.info),
           addressAlign_(header.addressAlign), entrySize_(header.entrySize) {}
 
 public:
+    ElfClass originalClass() const { return class_; }
     Elf_Word nameIndex() const { return nameIdx_; }
     ElfSectionType type() const { return type_; }
     Elf_XWord flags() const { return flags_; }
@@ -114,6 +115,7 @@ public:
     Elf_XWord entrySize() const { return entrySize_; }
 
 private:
+    ElfClass class_;
     Elf_Word nameIdx_;
     ElfSectionType type_;
     Elf_XWord flags_;

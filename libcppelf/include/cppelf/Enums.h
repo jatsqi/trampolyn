@@ -5,6 +5,7 @@
 #include "cppelf/TypeDefs.h"
 
 #include <cstdint>
+#include <type_traits>
 
 namespace cppelf {
 
@@ -18,6 +19,17 @@ inline constexpr layout::ElfClass elfClassToLayout(ElfClass cls) {
         return layout::Elf32;
     case ElfClass::ELF64:
         return layout::Elf64;
+    }
+}
+template <typename T>
+inline constexpr ElfClass layoutClassToElfClass(const T &t) {
+    layout::ElfClass extracted =
+        layout::ElfClassFromLayoutType<std::remove_cv_t<T>>::TypeElfClass;
+    switch (extracted) {
+    case layout::Elf32:
+        return ElfClass::ELF32;
+    case layout::Elf64:
+        return ElfClass::ELF64;
     }
 }
 

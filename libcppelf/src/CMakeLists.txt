@@ -2,6 +2,7 @@
 list(APPEND TRAMPOLYN_ELF_SOURCE_FILES
     ElfReader.cpp
     ElfTypes.cpp
+    Section.cpp
 )
 
 # Add objlib for linking with other targets
