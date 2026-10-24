@@ -1,11 +1,11 @@
 #ifndef TRAMPOLYN_CPPELF_ELFTYPES_H
 #define TRAMPOLYN_CPPELF_ELFTYPES_H
 
-#include "cppelf/Enums.h"
 #include "cppelf/TypeDefs.h"
 
 #include <cstdint>
 #include <cstring>
+#include <span>
 #include <string_view>
 #include <type_traits>
 #include <vector>
@@ -214,15 +214,32 @@ static_assert(sizeof(Elf64SectionHeader) == 64);
 /**
  * ELF string table section.
  */
-class ElfStringTableSection {
+class ElfGenericSectionView {
 public:
-    ElfStringTableSection(std::vector<char> &&data);
+    ElfGenericSectionView(std::span<const char> data);
 
+    std::span<const char> data() const { return data_; }
+    size_t size() const { return data_.size(); }
+
+private:
+    std::span<const char> data_;
+};
+
+/**
+ * ELF string table section.
+ */
+class ElfStringTableSectionView {
+public:
+    ElfStringTableSectionView(std::span<const char> data);
+
+    std::span<const char> data() const { return data_; }
+    size_t size() const { return data_.size(); }
     std::string_view lookup(size_t index) const;
 
 private:
-    std::vector<char> data_;
+    std::span<const char> data_;
 };
+
 
 } // namespace cppelf::layout
 
