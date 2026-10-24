@@ -2,10 +2,13 @@
 
 namespace cppelf::layout {
 
-ElfStringTableSection::ElfStringTableSection(std::vector<char> &&data)
-    : data_(std::move(data)) {}
+ElfGenericSectionView::ElfGenericSectionView(std::span<const char> data)
+    : data_(data) {}
 
-std::string_view ElfStringTableSection::lookup(size_t index) const {
+ElfStringTableSectionView::ElfStringTableSectionView(std::span<const char> data)
+    : data_(data) {}
+
+std::string_view ElfStringTableSectionView::lookup(size_t index) const {
     if (index == 0 || index >= data_.size())
         return {};
 

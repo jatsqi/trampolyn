@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <vector>
 
@@ -23,6 +24,9 @@ public:
 
     virtual ElfHeader readHeader() const = 0;
     virtual const std::vector<ElfSectionHeader> &readSectionHeaders() const = 0;
+
+    virtual std::span<const char> readBlob(size_t offset,
+                                           size_t size) const = 0;
 };
 
 template <ElfClass EClass> class ElfClassFileReader : public ElfReader {
@@ -37,6 +41,8 @@ public:
     ElfHeader readHeader() const override;
     const std::vector<ElfSectionHeader> &readSectionHeaders() const override;
 
+    std::span<const char> readBlob(size_t offset, size_t size) const override;
+
 private:
     void discoverLayout();
 
@@ -45,6 +51,9 @@ private:
 
     std::optional<ElfHeader> header_;
     std::vector<ElfSectionHeader> sectionHeaders_;
+
+    // Temporary solution until interface rework
+    mutable std::vector<std::vector<char>> blobs_;
 };
 
 } // namespace detail
@@ -66,11 +75,12 @@ public:
 
     template <IsConstructibleFromDataAndHeader SectionType>
     std::shared_ptr<SectionType> retrieveSection(size_t idx) const {
-        if (idx >= sectionHeaders_.size())
+        if (idx >= reader_->readSectionHeaders().size())
             return nullptr;
 
-        auto ptr = std::make_shared<SectionType>(sectionHeaders_[idx]);
-        return ptr;
+        ElfSectionHeader header = reader_->readSectionHeaders()[idx];
+        return std::make_shared<SectionType>(
+            header, reader_->readBlob(header.offset(), header.size()));
     }
 
 private:

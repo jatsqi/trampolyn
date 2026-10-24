@@ -35,6 +35,18 @@ ElfClassFileReader<EClass>::readSectionHeaders() const {
     return sectionHeaders_;
 }
 
+template <ElfClass EClass>
+std::span<const char> ElfClassFileReader<EClass>::readBlob(size_t offset,
+                                                           size_t size) const {
+    std::ifstream stream(path_.data(),
+                         std::ios_base::in | std::ios_base::binary);
+    std::vector<char> storage(size);
+    stream.read(storage.data(), size);
+    blobs_.push_back(std::move(storage));
+
+    return std::span<const char>(blobs_.back().data(), size);
+}
+
 template <ElfClass EClass> void ElfClassFileReader<EClass>::discoverLayout() {
     std::ifstream stream(path_.data(),
                          std::ios_base::in | std::ios_base::binary);

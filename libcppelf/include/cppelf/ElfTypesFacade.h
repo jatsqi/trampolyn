@@ -112,7 +112,7 @@ public:
     explicit ElfSectionHeader(const T &header)
         : nameIdx_(header.nameIdx),
           type_(static_cast<ElfSectionType>(header.type)), flags_(header.flags),
-          addr_(header.addr), offset_(header.offset), size_(header.size_),
+          addr_(header.addr), offset_(header.offset), size_(header.size),
           link_(header.link), info_(header.info),
           addressAlign_(header.addressAlign), entrySize_(header.entrySize) {}
 
