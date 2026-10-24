@@ -23,6 +23,16 @@ enum class ElfClass {
 constexpr ElfClass Elf32 = ElfClass::Elf32;
 constexpr ElfClass Elf64 = ElfClass::Elf64;
 
+/**
+ * Simple helper to extract the ElfClass from a type.
+ */
+template<typename T>
+struct ElfClassFromLayoutType;
+template<template<ElfClass> typename T, ElfClass EClass>
+struct ElfClassFromLayoutType<T<EClass>> {
+    static constexpr ElfClass TypeElfClass = EClass;
+};
+
 template<ElfClass EClass>
 struct ElfHeader;
 
@@ -301,6 +311,8 @@ public:
 private:
     std::span<const char> data_;
 };
+using Elf32SymbolTableSectionView = ElfSymbolTableSectionView<Elf32>;
+using Elf64SymbolTableSectionView = ElfSymbolTableSectionView<Elf64>;
 
 } // namespace cppelf::layout
 
