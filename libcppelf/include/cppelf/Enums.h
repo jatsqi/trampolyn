@@ -1,6 +1,7 @@
 #ifndef TRAMPOLYN_CPPELF_ENUMS_H
 #define TRAMPOLYN_CPPELF_ENUMS_H
 
+#include "cppelf/ElfTypes.h"
 #include "cppelf/TypeDefs.h"
 
 #include <cstdint>
@@ -10,20 +11,22 @@ namespace cppelf {
 /**
  * Types of ELF files.
  */
-enum class ElfClass : uint8_t {
-    ELF32 = 1,
-    ELF64 = 2
-};
+enum class ElfClass : uint8_t { ELF32 = 1, ELF64 = 2 };
+inline constexpr layout::ElfClass elfClassToLayout(ElfClass cls) {
+    switch (cls) {
+    case ElfClass::ELF32:
+        return layout::Elf32;
+    case ElfClass::ELF64:
+        return layout::Elf64;
+    }
+}
 
 /**
  * The data is either stored in little endian or big endian.
  *
  * @note This library, however, currently only support little endian.
  */
-enum class ElfEndianess : uint8_t {
-    LITTLE = 1,
-    BIG = 2
-};
+enum class ElfEndianess : uint8_t { LITTLE = 1, BIG = 2 };
 
 /**
  * List of all ELF section types.

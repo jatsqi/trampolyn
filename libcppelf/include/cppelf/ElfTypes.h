@@ -8,9 +8,38 @@
 #include <span>
 #include <string_view>
 #include <type_traits>
-#include <vector>
 
 namespace cppelf::layout {
+
+/**
+ * Enum to characterize the different elf classes.
+ *
+ * We use enum instead of enum class on purpose.
+ */
+enum class ElfClass {
+    Elf32 = 32,
+    Elf64 = 64
+};
+constexpr ElfClass Elf32 = ElfClass::Elf32;
+constexpr ElfClass Elf64 = ElfClass::Elf64;
+
+template<ElfClass EClass>
+struct ElfHeader;
+
+template<ElfClass EClass>
+struct ElfSymbol;
+
+template<ElfClass EClass>
+struct ElfRelocation;
+
+template<ElfClass EClass>
+struct ElfRelocationWithAddend;
+
+template<ElfClass EClass>
+struct ElfSectionHeader;
+
+template<ElfClass EClass>
+struct ElfSymbolTableSectionView;
 
 /**
  * The ELF header ident is stored at the beginning of the ELF header.
@@ -42,7 +71,8 @@ static_assert(std::is_trivially_copyable_v<ElfHeaderIdent>);
 /**
  * Layout the ELF 32 bit header.
  */
-class Elf32Header {
+template<>
+struct ElfHeader<Elf32> {
     ElfHeaderIdent ident;
     Elf32_Half type;
     Elf32_Half machine;
@@ -58,13 +88,15 @@ class Elf32Header {
     Elf32_Half shnum;
     Elf32_Half shstrndx;
 };
-static_assert(std::is_trivially_copyable_v<Elf32Header>);
-static_assert(sizeof(Elf32Header) == 52);
+using Elf32Header = ElfHeader<Elf32>;
+static_assert(std::is_trivially_copyable_v<ElfHeader<Elf32>>);
+static_assert(sizeof(ElfHeader<Elf32>) == 52);
 
 /**
  * Layout the ELF 64 bit header.
  */
-struct Elf64Header {
+template<>
+struct ElfHeader<Elf64> {
     ElfHeaderIdent ident;
     Elf64_Half type;
     Elf64_Half machine;
@@ -80,13 +112,15 @@ struct Elf64Header {
     Elf64_Half shnum;
     Elf64_Half shstrndx;
 };
-static_assert(std::is_trivially_copyable_v<Elf64Header>);
-static_assert(sizeof(Elf64Header) == 64);
+using Elf64Header = ElfHeader<Elf64>;
+static_assert(std::is_trivially_copyable_v<ElfHeader<Elf64>>);
+static_assert(sizeof(ElfHeader<Elf64>) == 64);
 
 /**
  * Layout of a single ELF 32 symbol table entry.
  */
-struct Elf32Symbol {
+template<>
+struct ElfSymbol<Elf32> {
     unsigned char type() const { return info & 0x0F; }
     unsigned char binding() const { return info >> 4; }
 
@@ -97,11 +131,13 @@ struct Elf32Symbol {
     unsigned char other;
     Elf32_Half sectionHeaderTableIdx;
 };
+using Elf32Symbol = ElfSymbol<Elf32>;
 
 /**
  * Layout of a single ELF 64 symbol table entry.
  */
-struct Elf64Symbol {
+template<>
+struct ElfSymbol<Elf64> {
     unsigned char type() const { return info & 0x0F; }
     unsigned char binding() const { return info >> 4; }
 
@@ -112,47 +148,57 @@ struct Elf64Symbol {
     Elf64_Addr value;
     Elf64_XWord size;
 };
+using Elf64Symbol = ElfSymbol<Elf64>;
 
 /**
  * Layout of a ELF 32 relocation entry without addend.
  */
-struct Elf32Relocation {
+template<>
+struct ElfRelocation<Elf32> {
     Elf32_Word symbolTableIndex() const { return info >> 8; }
     unsigned char type() const { return info & 0xFF; }
 
     Elf32_Addr offset;
     Elf32_Word info;
 };
+using Elf32Relocation = ElfRelocation<Elf32>;
 
 /**
  * Layout of a ELF 32 relocation entry with addend.
  */
-struct Elf32RelocationWithAddend : public Elf32Relocation {
+template<>
+struct ElfRelocationWithAddend<Elf32> : public ElfRelocation<Elf32> {
     Elf32_Sword addend;
 };
+using Elf32RelocationWithAddend = ElfRelocationWithAddend<Elf32>;
 
 /**
  * Layout of a ELF 64 relocation entry without addend.
  */
-struct Elf64Relocation {
+template<>
+struct ElfRelocation<Elf64> {
     Elf64_XWord symbolTableIndex() const { return info >> 32; }
     Elf64_XWord type() const { return info & 0xFFFFFFFFull; }
 
     Elf64_Addr offset;
     Elf64_XWord info;
 };
+using Elf64Relocation = ElfRelocation<Elf64>;
 
 /**
  * Layout of a ELF 64 relocation entry with addend.
  */
-struct Elf64RelocationWithAddend : public Elf64Relocation {
+template<>
+struct ElfRelocationWithAddend<Elf64> : public ElfRelocation<Elf64> {
     Elf64_SXWord addend;
 };
+using Elf64RelocationWithAddend = ElfRelocationWithAddend<Elf64>;
 
 /**
  * Layout the ELF 32 bit section header.
  */
-struct Elf32SectionHeader {
+template<>
+struct ElfSectionHeader<Elf32> {
     static constexpr Elf32_Word ProcessorTypeRange[2] = {0x70000000,
                                                          0x7fffffff};
     static constexpr Elf32_Word ApplicationTypeRange[2] = {0x80000000,
@@ -177,13 +223,15 @@ struct Elf32SectionHeader {
     Elf32_Word addressAlign;
     Elf32_Word entrySize;
 };
-static_assert(std::is_trivially_copyable_v<Elf32SectionHeader>);
-static_assert(sizeof(Elf32SectionHeader) == 40);
+using Elf32SectionHeader = ElfSectionHeader<Elf32>;
+static_assert(std::is_trivially_copyable_v<ElfSectionHeader<Elf32>>);
+static_assert(sizeof(ElfSectionHeader<Elf32>) == 40);
 
 /**
  * Layout the ELF 64 bit section header.
  */
-struct Elf64SectionHeader {
+template<>
+struct ElfSectionHeader<Elf64> {
     static constexpr Elf32_Word ApplicationTypeRange[2] = {0x60000000,
                                                            0x6FFFFFFF};
     static constexpr Elf32_Word ProcessorTypeRange[2] = {0x70000000,
@@ -208,8 +256,9 @@ struct Elf64SectionHeader {
     Elf64_XWord addressAlign;
     Elf64_XWord entrySize;
 };
-static_assert(std::is_trivially_copyable_v<Elf64SectionHeader>);
-static_assert(sizeof(Elf64SectionHeader) == 64);
+using Elf64SectionHeader = ElfSectionHeader<Elf64>;
+static_assert(std::is_trivially_copyable_v<ElfSectionHeader<Elf64>>);
+static_assert(sizeof(ElfSectionHeader<Elf64>) == 64);
 
 /**
  * ELF string table section.
@@ -240,6 +289,18 @@ private:
     std::span<const char> data_;
 };
 
+template<ElfClass EClass>
+class ElfSymbolTableSectionView {
+public:
+    ElfSymbolTableSectionView(std::span<const char> data);
+
+    std::span<const char> data() const { return data_; }
+    size_t size() const { return data_.size(); }
+    ElfSymbol<EClass> lookup(size_t index) const;
+
+private:
+    std::span<const char> data_;
+};
 
 } // namespace cppelf::layout
 

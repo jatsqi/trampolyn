@@ -10,21 +10,6 @@
 
 namespace cppelf {
 
-template<ElfClass EClass>
-struct ElfClassToTypes;
-
-template<>
-struct ElfClassToTypes<ElfClass::ELF32> {
-    using HeaderType = layout::Elf32Header;
-    using SectionHeaderType = layout::Elf32SectionHeader;
-};
-
-template<>
-struct ElfClassToTypes<ElfClass::ELF64> {
-    using HeaderType = layout::Elf64Header;
-    using SectionHeaderType = layout::Elf64SectionHeader;
-};
-
 class ElfHeaderIdent {
 public:
     explicit ElfHeaderIdent(const layout::ElfHeaderIdent &ident)

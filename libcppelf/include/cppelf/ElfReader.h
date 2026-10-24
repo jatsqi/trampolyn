@@ -25,13 +25,13 @@ public:
     virtual ElfHeader readHeader() const = 0;
     virtual const std::vector<ElfSectionHeader> &readSectionHeaders() const = 0;
 
-    virtual std::span<const char> readBlob(size_t offset,
-                                           size_t size) const = 0;
+    virtual std::vector<char> readRawData(size_t offset, size_t size) const = 0;
 };
 
 template <ElfClass EClass> class ElfClassFileReader : public ElfReader {
-    using LayoutHeaderType = ElfClassToTypes<EClass>::HeaderType;
-    using LayoutSectionHeaderType = ElfClassToTypes<EClass>::SectionHeaderType;
+    static constexpr auto LayoutType = elfClassToLayout(EClass);
+    using LayoutHeaderType = layout::ElfHeader<LayoutType>;
+    using LayoutSectionHeaderType = layout::ElfSectionHeader<LayoutType>;
 
 public:
     ElfClassFileReader(std::string_view path);
@@ -41,7 +41,7 @@ public:
     ElfHeader readHeader() const override;
     const std::vector<ElfSectionHeader> &readSectionHeaders() const override;
 
-    std::span<const char> readBlob(size_t offset, size_t size) const override;
+    std::vector<char> readRawData(size_t offset, size_t size) const override;
 
 private:
     void discoverLayout();
@@ -51,17 +51,14 @@ private:
 
     std::optional<ElfHeader> header_;
     std::vector<ElfSectionHeader> sectionHeaders_;
-
-    // Temporary solution until interface rework
-    mutable std::vector<std::vector<char>> blobs_;
 };
 
 } // namespace detail
 
 template <typename T>
 concept IsConstructibleFromDataAndHeader =
-    requires(const ElfSectionHeader &header, std::span<const char> data,
-             const T &t) { T{header, data}; };
+    requires(const ElfSectionHeader &header, std::vector<char> &&data,
+             const T &t) { T{header, std::move(data)}; };
 
 class ElfFileReader {
 public:
@@ -80,7 +77,7 @@ public:
 
         ElfSectionHeader header = reader_->readSectionHeaders()[idx];
         return std::make_shared<SectionType>(
-            header, reader_->readBlob(header.offset(), header.size()));
+            header, reader_->readRawData(header.offset(), header.size()));
     }
 
 private:
