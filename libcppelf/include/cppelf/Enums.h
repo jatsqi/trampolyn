@@ -1,8 +1,8 @@
 #ifndef TRAMPOLYN_CPPELF_ENUMS_H
 #define TRAMPOLYN_CPPELF_ENUMS_H
 
-#include "cppelf/ElfTypes.h"
-#include "cppelf/TypeDefs.h"
+#include "cppelf/layout/ElfTypes.h"
+#include "cppelf/layout/TypeDefs.h"
 
 #include <cstdint>
 #include <type_traits>

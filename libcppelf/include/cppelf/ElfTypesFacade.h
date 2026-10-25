@@ -1,7 +1,7 @@
 #ifndef TRAMPOLYN_CPPELF_FACADE_H
 #define TRAMPOLYN_CPPELF_FACADE_H
 
-#include "cppelf/ElfTypes.h"
+#include "cppelf/layout/ElfTypes.h"
 #include "cppelf/Enums.h"
 #include "cppelf/Flags.h"
 

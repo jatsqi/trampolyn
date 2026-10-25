@@ -1,7 +1,7 @@
 # Source files for ELF sublib
 list(APPEND TRAMPOLYN_ELF_SOURCE_FILES
+    layout/ElfTypes.cpp
     ElfReader.cpp
-    ElfTypes.cpp
     Section.cpp
 )
 

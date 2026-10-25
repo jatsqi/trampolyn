@@ -1,7 +1,7 @@
 #ifndef TRAMPOLYN_CPPELF_ELFTYPES_H
 #define TRAMPOLYN_CPPELF_ELFTYPES_H
 
-#include "cppelf/TypeDefs.h"
+#include "cppelf/layout/TypeDefs.h"
 
 #include <cstdint>
 #include <cstring>

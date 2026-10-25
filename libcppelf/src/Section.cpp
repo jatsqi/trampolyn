@@ -1,4 +1,4 @@
-#include "cppelf/ElfTypes.h"
+#include "cppelf/layout/ElfTypes.h"
 #include "cppelf/Sections.h"
 
 #include <cstring>

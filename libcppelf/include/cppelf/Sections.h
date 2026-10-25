@@ -1,7 +1,7 @@
 #ifndef TRAMPOLYN_CPPELF_SECTIONS_H
 #define TRAMPOLYN_CPPELF_SECTIONS_H
 
-#include "cppelf/ElfTypes.h"
+#include "cppelf/layout/ElfTypes.h"
 #include "cppelf/ElfTypesFacade.h"
 
 #include <cstddef>
