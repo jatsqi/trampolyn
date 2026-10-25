@@ -1,12 +1,12 @@
-#ifndef TRAMPOLYN_CPPELF_FLAGS_H
-#define TRAMPOLYN_CPPELF_FLAGS_H
+#ifndef TRAMPOLYN_CPPELF_UTILS_FLAGS_H
+#define TRAMPOLYN_CPPELF_UTILS_FLAGS_H
 
 #include <bitset>
 #include <cstddef>
 #include <limits>
 #include <type_traits>
 
-namespace cppelf {
+namespace cppelf::utils {
 
 // Technically not required, just for testing.
 template <typename T>

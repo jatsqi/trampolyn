@@ -1,9 +1,9 @@
 #ifndef TRAMPOLYN_CPPELF_FACADE_H
 #define TRAMPOLYN_CPPELF_FACADE_H
 
-#include "cppelf/layout/ElfTypes.h"
 #include "cppelf/Enums.h"
-#include "cppelf/Flags.h"
+#include "cppelf/layout/ElfTypes.h"
+#include "cppelf/utils/Flags.h"
 
 #include <cstdint>
 #include <type_traits>
@@ -141,7 +141,7 @@ public:
 public:
     Elf_Word nameIndex() const { return nameIdx_; }
     ElfSymbolType type() const { return type_; }
-    const Flags<ElfSymbolBinding> &bindings() const { return bindings_; }
+    const utils::Flags<ElfSymbolBinding> &bindings() const { return bindings_; }
 
     bool isLocal() const { return bindings_.check(ElfSymbolBinding::Local); }
     bool isGlobal() const { return bindings_.check(ElfSymbolBinding::Global); }
@@ -156,7 +156,7 @@ public:
 private:
     Elf_Word nameIdx_;
     ElfSymbolType type_;
-    Flags<ElfSymbolBinding> bindings_;
+    utils::Flags<ElfSymbolBinding> bindings_;
 };
 
 } // namespace cppelf
