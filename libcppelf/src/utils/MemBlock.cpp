@@ -8,8 +8,28 @@ MemBlock::~MemBlock() {
         delete[] data_;
 }
 
-std::unique_ptr<MemBlock> MemBlock::createOwning(const char *data,
-                                                 size_t size) {
+MemBlock::MemBlock(MemBlock &&other) noexcept
+    : size_(other.size_), owning_(other.size_), data_(other.data_) {
+    other.size_ = 0;
+    other.owning_ = false;
+}
+
+MemBlock &MemBlock::operator=(MemBlock &&other) noexcept {
+    if (&other == this)
+        return *this;
+    if (owning_)
+        delete[] data_;
+
+    size_ = other.size_;
+    owning_ = other.owning_;
+
+    other.size_ = 0;
+    other.owning_ = false;
+
+    return *this;
+}
+
+MemBlock MemBlock::createOwning(const char *data, size_t size) {
     // Allocate block
     size_t totalSize = size + sizeof(MemBlock);
     void *block = ::operator new(totalSize);
@@ -18,15 +38,31 @@ std::unique_ptr<MemBlock> MemBlock::createOwning(const char *data,
     std::memcpy(static_cast<char *>(block) + sizeof(MemBlock), data, size);
 
     // Construct MemBlock
-    MemBlock *memBlock = new (block) MemBlock(data, true, size);
-    return std::unique_ptr<MemBlock>(memBlock);
+    MemBlock *memBlock =
+        new (block) MemBlock(static_cast<const char *>(block), size, true);
+    return std::move(*memBlock);
+}
+
+MemBlock MemBlock::createOwning(std::function<void(char *)> filler,
+                                size_t size) {
+    // Allocate block
+    size_t totalSize = size + sizeof(MemBlock);
+    void *block = ::operator new(totalSize);
+
+    // Load payload
+    filler(static_cast<char *>(block));
+
+    // Construct MemBlock
+    MemBlock *memBlock =
+        new (block) MemBlock(static_cast<const char *>(block), size, true);
+    return std::move(*memBlock);
 }
 
 MemBlock MemBlock::createNonOwning(const char *data, size_t size) {
-    return MemBlock(data, false, size);
+    return MemBlock(data, size, false);
 }
 
-MemBlock::MemBlock(const char *data, bool owning, size_t size)
-    : size_(size), owning_(owning), data_(data) {}
+MemBlock::MemBlock(const char *data, size_t size, bool owning)
+    : data_(data), size_(size), owning_(owning) {}
 
 } // namespace cppelf::utils
