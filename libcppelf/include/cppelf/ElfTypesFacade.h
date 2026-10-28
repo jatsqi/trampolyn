@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace cppelf {
+namespace cppelf::facade {
 
 class ElfHeaderIdent {
 public:
