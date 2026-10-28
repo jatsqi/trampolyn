@@ -5,9 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <map>
-#include <memory>
-#include <string>
+#include <set>
 #include <string_view>
 #include <vector>
 
@@ -35,8 +33,13 @@ public:
  */
 class MemoryMappedFile : public File {
 public:
-    MemoryMappedFile(std::string_view path);
+    explicit MemoryMappedFile(std::string_view path);
     ~MemoryMappedFile();
+
+    MemoryMappedFile(const MemoryMappedFile &) = delete;
+    MemoryMappedFile &operator=(const MemoryMappedFile &) = delete;
+    MemoryMappedFile(MemoryMappedFile &&) noexcept;
+    MemoryMappedFile &operator=(MemoryMappedFile &&) noexcept;
 
     virtual MemBlock read(size_t offset, size_t size) const override;
 
@@ -64,7 +67,6 @@ public:
         }
     };
 
-public:
     SectionedFile(std::string_view path);
     SectionedFile(std::string_view path, const std::vector<Section> &sections);
 
@@ -74,13 +76,9 @@ public:
     void addSection(Section section);
 
 private:
-    typename std::map<Section, MemBlock, SectionComp>::value_type *
-    retrieveSection(Section section) const;
-    typename std::map<Section, MemBlock, SectionComp>::value_type *
-    findContainingSection(size_t offset, size_t size) const;
+    const Section* findContainingSection(size_t offset, size_t size) const;
 
-private:
-    mutable std::map<Section, MemBlock, SectionComp> sections_;
+    std::set<Section, SectionComp> sections_;
 };
 
 } // namespace cppelf::utils
