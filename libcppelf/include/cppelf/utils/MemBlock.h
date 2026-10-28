@@ -8,7 +8,7 @@ namespace cppelf::utils {
 
 class MemBlock {
 public:
-    MemBlock() = default;
+    MemBlock();
     virtual ~MemBlock();
 
     MemBlock(const MemBlock &) = delete;
@@ -20,11 +20,10 @@ public:
     bool isOwning() const { return owning_; }
 
     const char *data() const {
-        const char *ptr =
-            reinterpret_cast<const char *>(this) + sizeof(MemBlock);
-        if (owning_)
-            return ptr;
-        return *reinterpret_cast<const char *const *>(ptr);
+        if (!owning_)
+            return data_;
+        return *reinterpret_cast<const char *const *>(
+            reinterpret_cast<const char *>(this) + sizeof(MemBlock));
     }
 
     static MemBlock createOwning(const char *data, size_t size);

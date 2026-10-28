@@ -1,15 +1,19 @@
 #include "cppelf/utils/MemBlock.h"
 #include <cstring>
+#include <new>
 
 namespace cppelf::utils {
 
+MemBlock::MemBlock() : data_(nullptr), size_(0), owning_(false) {}
+
 MemBlock::~MemBlock() {
     if (owning_)
-        delete[] data_;
+        ::operator delete(const_cast<char *>(data_));
 }
 
 MemBlock::MemBlock(MemBlock &&other) noexcept
-    : size_(other.size_), owning_(other.size_), data_(other.data_) {
+    : data_(other.data_), size_(other.size_), owning_(other.owning_) {
+    other.data_ = nullptr;
     other.size_ = 0;
     other.owning_ = false;
 }
@@ -20,9 +24,11 @@ MemBlock &MemBlock::operator=(MemBlock &&other) noexcept {
     if (owning_)
         delete[] data_;
 
+    data_ = other.data_;
     size_ = other.size_;
     owning_ = other.owning_;
 
+    other.data_ = nullptr;
     other.size_ = 0;
     other.owning_ = false;
 
