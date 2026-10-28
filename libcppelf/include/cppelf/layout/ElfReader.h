@@ -14,6 +14,8 @@ class MemBlock;
 
 namespace cppelf::layout {
 
+ElfHeaderIdent readHeaderIdentFromPath(std::string_view path);
+
 template <ElfClass EClass> class ElfFileReader {
 public:
     ElfFileReader(std::string_view path);

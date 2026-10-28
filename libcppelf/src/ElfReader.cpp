@@ -1,9 +1,8 @@
 #include "cppelf/ElfReader.h"
 #include "cppelf/ElfTypesFacade.h"
 #include "cppelf/Enums.h"
+#include "cppelf/layout/ElfReader.h"
 
-#include <fstream>
-#include <ios>
 #include <memory>
 #include <vector>
 
@@ -48,13 +47,7 @@ template class ElfClassFileReader<ElfClass::ELF64>;
 } // namespace detail
 
 ElfFileReader::ElfFileReader(std::string_view path) {
-    // This is a layer violation at the moment, but don't care right now.
-    layout::ElfHeaderIdent ident;
-    std::ifstream stream;
-    stream.open(path.data(), std::ios_base::in);
-    stream.read(reinterpret_cast<char *>(&ident), sizeof(ElfHeaderIdent));
-    stream.close();
-
+    layout::ElfHeaderIdent ident = layout::readHeaderIdentFromPath(path);
     ElfClass cls;
     cls = static_cast<ElfClass>(ident.class_);
 

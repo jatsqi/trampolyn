@@ -1,9 +1,23 @@
 #include "cppelf/layout/ElfReader.h"
+#include "cppelf/layout/ElfTypes.h"
 #include "cppelf/utils/MemBlock.h"
 
+#include <array>
+#include <bit>
 #include <cstring>
+#include <fstream>
+#include <ios>
 
 namespace cppelf::layout {
+
+ElfHeaderIdent readHeaderIdentFromPath(std::string_view path) {
+    std::ifstream in(std::string(path.data()).c_str());
+    in.seekg(0, std::ios_base::beg);
+
+    std::array<char, sizeof(ElfHeaderIdent)> data;
+    in.read(data.data(), data.size());
+    return std::bit_cast<ElfHeaderIdent>(data);
+}
 
 template <ElfClass EClass>
 ElfFileReader<EClass>::ElfFileReader(std::string_view path)
