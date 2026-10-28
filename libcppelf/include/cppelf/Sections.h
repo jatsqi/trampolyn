@@ -3,13 +3,14 @@
 
 #include "cppelf/layout/ElfTypes.h"
 #include "cppelf/ElfTypesFacade.h"
+#include "cppelf/utils/MemBlock.h"
 
 #include <cstddef>
 #include <string_view>
 #include <variant>
 #include <vector>
 
-namespace cppelf {
+namespace cppelf::facade {
 
 /**
  * Empty base class with virtual destructor.
@@ -26,14 +27,14 @@ public:
  */
 class ElfStringSection : public ElfSectionBase {
 public:
-    ElfStringSection(const ElfSectionHeader &header, std::vector<char> &&data);
+    ElfStringSection(const ElfSectionHeader &header, utils::MemBlock&& memblock);
 
     std::string_view getString(size_t index) const;
     size_t numBytes() const;
 
 private:
     ElfSectionHeader header_;
-    std::vector<char> data_;
+    utils::MemBlock data_;
     layout::ElfStringTableSectionView section_;
 };
 

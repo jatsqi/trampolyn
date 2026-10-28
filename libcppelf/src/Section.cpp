@@ -1,14 +1,15 @@
 #include "cppelf/layout/ElfTypes.h"
 #include "cppelf/Sections.h"
+#include "cppelf/utils/MemBlock.h"
 
 #include <cstring>
 #include <string_view>
 #include <variant>
 
-namespace cppelf {
+namespace cppelf::facade {
 
 ElfStringSection::ElfStringSection(const ElfSectionHeader &header,
-                                   std::vector<char> &&data)
+                                   utils::MemBlock &&data)
     : header_(header), data_(std::move(data)),
       section_(std::span<const char>(data_.data(), data_.size())) {}
 
