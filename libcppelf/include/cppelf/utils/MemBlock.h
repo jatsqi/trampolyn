@@ -1,6 +1,7 @@
 #ifndef TRAMPOLYN_CPPELF_UTILS_MEMBLOCK_H
 #define TRAMPOLYN_CPPELF_UTILS_MEMBLOCK_H
 
+#include "cppelf/utils/MemView.h"
 #include <cstdint>
 #include <functional>
 
@@ -18,6 +19,9 @@ public:
 
     size_t size() const { return size_; }
     bool isOwning() const { return owning_; }
+
+    // TODO: rework interface
+    MemView asView() { return MemView{data_, size_}; }
 
     const char *data() const {
         if (!owning_)

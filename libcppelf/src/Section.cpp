@@ -1,5 +1,5 @@
-#include "cppelf/layout/ElfTypes.h"
 #include "cppelf/Sections.h"
+#include "cppelf/layout/ElfTypes.h"
 #include "cppelf/utils/MemBlock.h"
 
 #include <cstring>
@@ -10,8 +10,7 @@ namespace cppelf::facade {
 
 ElfStringSection::ElfStringSection(const ElfSectionHeader &header,
                                    utils::MemBlock &&data)
-    : header_(header), data_(std::move(data)),
-      section_(std::span<const char>(data_.data(), data_.size())) {}
+    : header_(header), data_(std::move(data)), section_(data_.asView()) {}
 
 std::string_view ElfStringSection::getString(size_t index) const {
     if (index >= section_.size())
@@ -21,18 +20,17 @@ std::string_view ElfStringSection::getString(size_t index) const {
     return std::string_view(str, std::strlen(str));
 }
 
-size_t ElfStringSection::numBytes() const {
-    return section_.data().size_bytes();
-}
+size_t ElfStringSection::numBytes() const { return section_.data().size(); }
 
 ElfSymbolTableSection::ElfSymbolTableSection(const ElfSectionHeader &header,
-                                             std::vector<char> &&data)
+                                             utils::MemBlock &&data)
     : header_(header), data_(std::move(data)),
-      section_(
-          header.originalClass() == ElfClass::ELF32
-              ? decltype(section_)(layout::Elf32SymbolTableSectionView(data_))
-              : decltype(section_)(
-                    layout::Elf64SymbolTableSectionView(data_))) {}
+      section_(header.originalClass() == ElfClass::ELF32
+                   ? decltype(section_)(
+                         layout::Elf32SymbolTableSectionView(data_.asView()))
+                   : decltype(section_)(
+                         layout::Elf64SymbolTableSectionView(data_.asView()))) {
+}
 
 size_t ElfSymbolTableSection::numSymbols() const {
     return header_.size() / header_.entrySize();
@@ -45,14 +43,11 @@ ElfSymbol ElfSymbolTableSection::lookup(size_t index) const {
 }
 
 ElfGenericSection::ElfGenericSection(const ElfSectionHeader &header,
-                                     std::vector<char> &&data)
-    : header_(header), data_(std::move(data)),
-      section_(std::span<const char>(data_.data(), data_.size())) {}
+                                     utils::MemBlock &&data)
+    : header_(header), data_(std::move(data)), section_(data_.asView()) {}
 
-std::span<const char> ElfGenericSection::data() const {
-    return section_.data();
-}
+utils::MemView ElfGenericSection::data() const { return section_.data(); }
 
 size_t ElfGenericSection::size() const { return section_.size(); }
 
-}; // namespace cppelf
+}; // namespace cppelf::facade

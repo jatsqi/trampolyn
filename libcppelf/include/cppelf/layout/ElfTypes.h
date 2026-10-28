@@ -2,6 +2,7 @@
 #define TRAMPOLYN_CPPELF_LAYOUT_ELFTYPES_H
 
 #include "cppelf/layout/TypeDefs.h"
+#include "cppelf/utils/MemView.h"
 
 #include <cstdint>
 #include <cstring>
@@ -275,13 +276,13 @@ static_assert(sizeof(ElfSectionHeader<Elf64>) == 64);
  */
 class ElfGenericSectionView {
 public:
-    ElfGenericSectionView(std::span<const char> data);
+    ElfGenericSectionView(utils::MemView data);
 
-    std::span<const char> data() const { return data_; }
+    utils::MemView data() const { return data_; }
     size_t size() const { return data_.size(); }
 
 private:
-    std::span<const char> data_;
+    utils::MemView data_;
 };
 
 /**
@@ -289,27 +290,27 @@ private:
  */
 class ElfStringTableSectionView {
 public:
-    ElfStringTableSectionView(std::span<const char> data);
+    ElfStringTableSectionView(utils::MemView data);
 
-    std::span<const char> data() const { return data_; }
+    utils::MemView data() const { return data_; }
     size_t size() const { return data_.size(); }
     std::string_view lookup(size_t index) const;
 
 private:
-    std::span<const char> data_;
+    utils::MemView data_;
 };
 
 template<ElfClass EClass>
 class ElfSymbolTableSectionView {
 public:
-    ElfSymbolTableSectionView(std::span<const char> data);
+    ElfSymbolTableSectionView(utils::MemView data);
 
-    std::span<const char> data() const { return data_; }
+    utils::MemView data() const { return data_; }
     size_t size() const { return data_.size(); }
     ElfSymbol<EClass> lookup(size_t index) const;
 
 private:
-    std::span<const char> data_;
+    utils::MemView data_;
 };
 using Elf32SymbolTableSectionView = ElfSymbolTableSectionView<Elf32>;
 using Elf64SymbolTableSectionView = ElfSymbolTableSectionView<Elf64>;

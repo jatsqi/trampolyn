@@ -4,11 +4,11 @@
 #include "cppelf/layout/ElfTypes.h"
 #include "cppelf/ElfTypesFacade.h"
 #include "cppelf/utils/MemBlock.h"
+#include "cppelf/utils/MemView.h"
 
 #include <cstddef>
 #include <string_view>
 #include <variant>
-#include <vector>
 
 namespace cppelf::facade {
 
@@ -27,7 +27,7 @@ public:
  */
 class ElfStringSection : public ElfSectionBase {
 public:
-    ElfStringSection(const ElfSectionHeader &header, utils::MemBlock&& memblock);
+    ElfStringSection(const ElfSectionHeader &header, utils::MemBlock&& data);
 
     std::string_view getString(size_t index) const;
     size_t numBytes() const;
@@ -43,15 +43,14 @@ private:
  */
 class ElfSymbolTableSection : public ElfSectionBase {
 public:
-    ElfSymbolTableSection(const ElfSectionHeader &header,
-                          std::vector<char> &&data);
+    ElfSymbolTableSection(const ElfSectionHeader &header, utils::MemBlock&& data);
 
     size_t numSymbols() const;
     ElfSymbol lookup(size_t index) const;
 
 private:
     ElfSectionHeader header_;
-    std::vector<char> data_;
+    utils::MemBlock&& data_;
     std::variant<layout::Elf32SymbolTableSectionView,
                  layout::Elf64SymbolTableSectionView>
         section_;
@@ -62,14 +61,14 @@ private:
  */
 class ElfGenericSection : public ElfSectionBase {
 public:
-    ElfGenericSection(const ElfSectionHeader &header, std::vector<char> &&data);
+    ElfGenericSection(const ElfSectionHeader &header, utils::MemBlock&& data);
 
-    std::span<const char> data() const;
+    utils::MemView data() const;
     size_t size() const;
 
 private:
     ElfSectionHeader header_;
-    std::vector<char> data_;
+    utils::MemBlock data_;
     layout::ElfGenericSectionView section_;
 };
 

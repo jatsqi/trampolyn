@@ -1,11 +1,12 @@
 #include "cppelf/layout/ElfTypes.h"
+#include "cppelf/utils/MemView.h"
 
 namespace cppelf::layout {
 
-ElfGenericSectionView::ElfGenericSectionView(std::span<const char> data)
+ElfGenericSectionView::ElfGenericSectionView(utils::MemView data)
     : data_(data) {}
 
-ElfStringTableSectionView::ElfStringTableSectionView(std::span<const char> data)
+ElfStringTableSectionView::ElfStringTableSectionView(utils::MemView data)
     : data_(data) {}
 
 std::string_view ElfStringTableSectionView::lookup(size_t index) const {
@@ -18,7 +19,7 @@ std::string_view ElfStringTableSectionView::lookup(size_t index) const {
 
 template <ElfClass EClass>
 ElfSymbolTableSectionView<EClass>::ElfSymbolTableSectionView(
-    std::span<const char> data)
+    utils::MemView data)
     : data_(data) {}
 
 template <ElfClass EClass>
