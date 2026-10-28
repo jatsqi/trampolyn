@@ -7,13 +7,14 @@
 #include <memory>
 #include <vector>
 
-namespace cppelf {
+namespace cppelf::facade {
 namespace detail {
 
 template <ElfClass EClass>
 ElfClassFileReader<EClass>::ElfClassFileReader(std::string_view path)
-    : path_(path) {
-    discoverLayout();
+    : file_(path), header_(file_.readHeader()) {
+    for (const auto &sh : file_.readSectionHeaders())
+        sectionHeaders_.emplace_back(sh);
 }
 
 template <ElfClass EClass> bool ElfClassFileReader<EClass>::open() {
@@ -26,7 +27,7 @@ template <ElfClass EClass> bool ElfClassFileReader<EClass>::close() {
 
 template <ElfClass EClass>
 ElfHeader ElfClassFileReader<EClass>::readHeader() const {
-    return *header_;
+    return header_;
 }
 
 template <ElfClass EClass>
@@ -36,38 +37,9 @@ ElfClassFileReader<EClass>::readSectionHeaders() const {
 }
 
 template <ElfClass EClass>
-std::vector<char> ElfClassFileReader<EClass>::readRawData(size_t offset,
-                                                           size_t size) const {
-    std::ifstream stream(path_.data(),
-                         std::ios_base::in | std::ios_base::binary);
-    std::vector<char> storage(size);
-    stream.seekg(offset, std::ios_base::beg);
-    stream.read(storage.data(), size);
-    stream.close();
-
-    return storage;
-}
-
-template <ElfClass EClass> void ElfClassFileReader<EClass>::discoverLayout() {
-    std::ifstream stream(path_.data(),
-                         std::ios_base::in | std::ios_base::binary);
-
-    // Reader header
-    LayoutHeaderType header;
-    stream.read(reinterpret_cast<char *>(&header), sizeof(LayoutHeaderType));
-    header_ = ElfHeader(header);
-
-    // Read section headers
-    std::vector<LayoutSectionHeaderType> sections;
-    sections.resize(header_->sectionHeaderNumEntries());
-    stream.seekg(header_->sectionHeaderOffset(), std::ios_base::beg);
-    stream.read(reinterpret_cast<char *>(sections.data()),
-                sizeof(LayoutSectionHeaderType) *
-                    header_->sectionHeaderNumEntries());
-    for (const LayoutSectionHeaderType &h : sections)
-        sectionHeaders_.emplace_back(h);
-
-    stream.close();
+utils::MemBlock ElfClassFileReader<EClass>::readRawData(size_t offset,
+                                                        size_t size) const {
+    return file_.readRaw(offset, size);
 }
 
 template class ElfClassFileReader<ElfClass::ELF32>;
@@ -76,6 +48,7 @@ template class ElfClassFileReader<ElfClass::ELF64>;
 } // namespace detail
 
 ElfFileReader::ElfFileReader(std::string_view path) {
+    // This is a layer violation at the moment, but don't care right now.
     layout::ElfHeaderIdent ident;
     std::ifstream stream;
     stream.open(path.data(), std::ios_base::in);
@@ -97,4 +70,4 @@ ElfFileReader::ElfFileReader(std::string_view path) {
     }
 }
 
-} // namespace cppelf
+} // namespace cppelf::facade
