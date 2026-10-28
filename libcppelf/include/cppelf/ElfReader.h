@@ -4,14 +4,14 @@
 
 #include "cppelf/ElfTypesFacade.h"
 #include "cppelf/Enums.h"
+#include "cppelf/layout/ElfReader.h"
+#include "cppelf/utils/MemBlock.h"
 
 #include <memory>
-#include <optional>
-#include <span>
 #include <string_view>
 #include <vector>
 
-namespace cppelf {
+namespace cppelf::facade {
 
 namespace detail {
 
@@ -25,7 +25,7 @@ public:
     virtual ElfHeader readHeader() const = 0;
     virtual const std::vector<ElfSectionHeader> &readSectionHeaders() const = 0;
 
-    virtual std::vector<char> readRawData(size_t offset, size_t size) const = 0;
+    virtual utils::MemBlock readRawData(size_t offset, size_t size) const = 0;
 };
 
 template <ElfClass EClass> class ElfClassFileReader : public ElfReader {
@@ -41,15 +41,12 @@ public:
     ElfHeader readHeader() const override;
     const std::vector<ElfSectionHeader> &readSectionHeaders() const override;
 
-    std::vector<char> readRawData(size_t offset, size_t size) const override;
+    utils::MemBlock readRawData(size_t offset, size_t size) const override;
 
 private:
-    void discoverLayout();
+    layout::ElfFileReader<LayoutType> file_;
 
-private:
-    std::string_view path_;
-
-    std::optional<ElfHeader> header_;
+    ElfHeader header_;
     std::vector<ElfSectionHeader> sectionHeaders_;
 };
 
@@ -57,7 +54,7 @@ private:
 
 template <typename T>
 concept IsConstructibleFromDataAndHeader =
-    requires(const ElfSectionHeader &header, std::vector<char> &&data,
+    requires(const ElfSectionHeader &header, utils::MemBlock &&data,
              const T &t) { T{header, std::move(data)}; };
 
 class ElfFileReader {
