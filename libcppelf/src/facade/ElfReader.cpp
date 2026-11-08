@@ -1,5 +1,5 @@
-#include "cppelf/ElfReader.h"
-#include "cppelf/ElfTypesFacade.h"
+#include "cppelf/facade/ElfReader.h"
+#include "cppelf/facade/ElfTypes.h"
 #include "cppelf/Enums.h"
 #include "cppelf/layout/ElfReader.h"
 

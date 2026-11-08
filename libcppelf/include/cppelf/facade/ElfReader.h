@@ -2,7 +2,7 @@
 #ifndef TRAMPOLYN_CPPELF_ELFREADER_H
 #define TRAMPOLYN_CPPELF_ELFREADER_H
 
-#include "cppelf/ElfTypesFacade.h"
+#include "cppelf/facade/ElfTypes.h"
 #include "cppelf/Enums.h"
 #include "cppelf/layout/ElfReader.h"
 #include "cppelf/utils/MemBlock.h"

@@ -2,7 +2,7 @@
 #define TRAMPOLYN_CPPELF_SECTIONS_H
 
 #include "cppelf/layout/ElfTypes.h"
-#include "cppelf/ElfTypesFacade.h"
+#include "cppelf/facade/ElfTypes.h"
 #include "cppelf/utils/MemBlock.h"
 #include "cppelf/utils/MemView.h"
 

@@ -6,8 +6,8 @@ list(APPEND TRAMPOLYN_ELF_SOURCE_FILES
     utils/Files.cpp
     utils/MemBlock.cpp
 
-    ElfReader.cpp
-    Section.cpp
+    facade/ElfReader.cpp
+    facade/Section.cpp
 )
 
 # Add objlib for linking with other targets
