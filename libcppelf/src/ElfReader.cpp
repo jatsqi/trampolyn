@@ -14,14 +14,9 @@ ElfClassFileReader<EClass>::ElfClassFileReader(std::string_view path)
     : file_(path), header_(file_.readHeader()) {
     for (const auto &sh : file_.readSectionHeaders())
         sectionHeaders_.emplace_back(sh);
-}
 
-template <ElfClass EClass> bool ElfClassFileReader<EClass>::open() {
-    return true;
-}
-
-template <ElfClass EClass> bool ElfClassFileReader<EClass>::close() {
-    return true;
+    for (const auto &sh : file_.readProgramHeaders())
+        programHeaderEntries_.emplace_back(sh);
 }
 
 template <ElfClass EClass>
@@ -33,6 +28,12 @@ template <ElfClass EClass>
 const std::vector<ElfSectionHeader> &
 ElfClassFileReader<EClass>::readSectionHeaders() const {
     return sectionHeaders_;
+}
+
+template <ElfClass EClass>
+const std::vector<ElfProgramHeaderTableEntry> &
+ElfClassFileReader<EClass>::readProgramHeaderEntries() const {
+    return programHeaderEntries_;
 }
 
 template <ElfClass EClass>

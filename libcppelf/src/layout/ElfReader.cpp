@@ -22,7 +22,8 @@ ElfHeaderIdent readHeaderIdentFromPath(std::string_view path) {
 template <ElfClass EClass>
 ElfFileReader<EClass>::ElfFileReader(std::string_view path)
     : file_(path), cachedHeader_(retrieveHeader()),
-      cachedSections_(retrieveSectionHeaders()) {}
+      cachedSections_(retrieveSectionHeaders()),
+      cachedEntries_(retrieveProgramHeaders()) {}
 
 template <ElfClass EClass>
 ElfHeader<EClass> ElfFileReader<EClass>::readHeader() const {
@@ -36,13 +37,20 @@ ElfFileReader<EClass>::readSectionHeaders() const {
 }
 
 template <ElfClass EClass>
+std::vector<ElfProgramHeaderTableEntry<EClass>>
+ElfFileReader<EClass>::readProgramHeaders() const {
+    return cachedEntries_;
+}
+
+template <ElfClass EClass>
 utils::MemBlock ElfFileReader<EClass>::readSection(
     const ElfSectionHeader<EClass> &header) const {
     return file_.read(header.offset, header.size);
 }
 
 template <ElfClass EClass>
-utils::MemBlock ElfFileReader<EClass>::readRaw(size_t offset, size_t size) const {
+utils::MemBlock ElfFileReader<EClass>::readRaw(size_t offset,
+                                               size_t size) const {
     return file_.read(offset, size);
 }
 
@@ -65,6 +73,19 @@ ElfFileReader<EClass>::retrieveSectionHeaders() const {
     utils::MemBlock block = file_.read(cachedHeader_.shoff, numBytes);
     memcpy(reinterpret_cast<char *>(sections.data()), block.data(), numBytes);
     return sections;
+}
+
+template <ElfClass EClass>
+std::vector<ElfProgramHeaderTableEntry<EClass>>
+ElfFileReader<EClass>::retrieveProgramHeaders() const {
+    std::vector<ElfProgramHeaderTableEntry<EClass>> headers;
+    headers.resize(cachedHeader_.phnum);
+
+    size_t numBytes =
+        cachedHeader_.phnum * sizeof(ElfProgramHeaderTableEntry<EClass>);
+    utils::MemBlock block = file_.read(cachedHeader_.phoff, numBytes);
+    memcpy(reinterpret_cast<char *>(headers.data()), block.data(), numBytes);
+    return headers;
 }
 
 template class ElfFileReader<Elf32>;

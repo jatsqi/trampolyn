@@ -20,24 +20,28 @@ template <ElfClass EClass> class ElfFileReader {
 public:
     ElfFileReader(std::string_view path);
     ~ElfFileReader() = default;
-    ElfFileReader(ElfFileReader<EClass>&&) = default;
-    ElfFileReader<EClass>& operator=(ElfFileReader<EClass>&&) = default;
+    ElfFileReader(ElfFileReader<EClass> &&) = default;
+    ElfFileReader<EClass> &operator=(ElfFileReader<EClass> &&) = default;
 
 public:
     ElfHeader<EClass> readHeader() const;
     std::vector<ElfSectionHeader<EClass>> readSectionHeaders() const;
+    std::vector<ElfProgramHeaderTableEntry<EClass>> readProgramHeaders() const;
     utils::MemBlock readSection(const ElfSectionHeader<EClass> &) const;
     utils::MemBlock readRaw(size_t offset, size_t size) const;
 
 private:
     ElfHeader<EClass> retrieveHeader() const;
     std::vector<ElfSectionHeader<EClass>> retrieveSectionHeaders() const;
+    std::vector<ElfProgramHeaderTableEntry<EClass>>
+    retrieveProgramHeaders() const;
 
 private:
     utils::SectionedFile file_;
 
     ElfHeader<EClass> cachedHeader_;
     std::vector<ElfSectionHeader<EClass>> cachedSections_;
+    std::vector<ElfProgramHeaderTableEntry<EClass>> cachedEntries_;
 };
 using Elf32FileReader = ElfFileReader<Elf32>;
 using Elf64FileReader = ElfFileReader<Elf64>;

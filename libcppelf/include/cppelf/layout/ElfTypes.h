@@ -50,7 +50,10 @@ template<ElfClass EClass>
 struct ElfSectionHeader;
 
 template<ElfClass EClass>
-struct ElfSymbolTableSectionView;
+struct ElfProgramHeaderTableEntry;
+
+template<ElfClass EClass>
+class ElfSymbolTableSectionView;
 
 /**
  * The ELF header ident is stored at the beginning of the ELF header.
@@ -270,6 +273,38 @@ struct ElfSectionHeader<Elf64> {
 using Elf64SectionHeader = ElfSectionHeader<Elf64>;
 static_assert(std::is_trivially_copyable_v<ElfSectionHeader<Elf64>>);
 static_assert(sizeof(ElfSectionHeader<Elf64>) == 64);
+
+/**
+ * ELF 32 Program header table.
+ */
+template<>
+struct ElfProgramHeaderTableEntry<Elf32> {
+    Elf32_Word type;
+    Elf32_Off offset;
+    Elf32_Addr vma;
+    Elf32_Addr paddr;
+    Elf32_Word fileSize;
+    Elf32_Word memSize;
+    Elf32_Word flags;
+    Elf32_Word align;
+};
+using Elf32ProgramHeaderTableEntry = ElfProgramHeaderTableEntry<Elf32>;
+
+/**
+ * ELF 64 Program header table.
+ */
+template<>
+struct ElfProgramHeaderTableEntry<Elf64> {
+    Elf64_Word type;
+    Elf64_Word flags;
+    Elf64_Off offset;
+    Elf64_Addr vma;
+    Elf64_Addr paddr;
+    Elf64_XWord fileSize;
+    Elf64_XWord memSize;
+    Elf64_XWord align;
+};
+using Elf64ProgramHeaderTableEntry = ElfProgramHeaderTableEntry<Elf64>;
 
 /**
  * ELF string table section.

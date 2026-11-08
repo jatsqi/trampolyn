@@ -96,6 +96,34 @@ enum class ElfSymbolType : Elf_XWord {
     EnvironmentSpecific = UINT64_MAX
 };
 
+/**
+ * Types of segments.
+ */
+enum class ElfSegmentType : Elf_XWord {
+    NoType = 0,
+    Load = 1,
+    Dynamic = 2,
+    InterpreterPath = 3,
+    Note = 4,
+    ShLib = 5,
+    ProgramHeaderTable = 6,
+
+    ProcessorSpecific = UINT64_MAX - 1,
+    EnvironmentSpecific = UINT64_MAX
+};
+
+/**
+ * Attributes a segment can have.
+ */
+enum class ElfSegmentAttributes : Elf_XWord {
+    Execute = 0x1,
+    Write = 0x2,
+    Read = 0x3,
+
+    ProcessorSpecific = UINT64_MAX - 1,
+    EnvironmentSpecific = UINT64_MAX
+};
+
 } // namespace cppelf
 
 #endif

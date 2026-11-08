@@ -159,6 +159,38 @@ private:
     utils::Flags<ElfSymbolBinding> bindings_;
 };
 
-} // namespace cppelf
+class ElfProgramHeaderTableEntry {
+public:
+    template <typename T>
+        requires std::is_same_v<T, layout::Elf32ProgramHeaderTableEntry> ||
+                     std::is_same_v<T, layout::Elf64ProgramHeaderTableEntry>
+    ElfProgramHeaderTableEntry(const T &entry)
+        : type_(static_cast<ElfSegmentType>(entry.type)), flags_(entry.flags),
+          offset_(entry.offset), vma_(entry.vma), paddr_(entry.paddr),
+          fileSize_(entry.fileSize), memSize_(entry.memSize),
+          align_(entry.align) {}
+
+public:
+    ElfSegmentType type() const { return type_; }
+    Elf_Word flags() const { return flags_; };
+    Elf_Off offset() const { return offset_; };
+    Elf_Addr vma() const { return vma_; };
+    Elf_Addr paddr() const { return paddr_; };
+    Elf_XWord fileSize() const { return fileSize_; };
+    Elf_XWord memSize() const { return memSize_; };
+    Elf_XWord align() const { return align_; };
+
+private:
+    ElfSegmentType type_;
+    Elf_Word flags_;
+    Elf_Off offset_;
+    Elf_Addr vma_;
+    Elf_Addr paddr_;
+    Elf_XWord fileSize_;
+    Elf_XWord memSize_;
+    Elf_XWord align_;
+};
+
+} // namespace cppelf::facade
 
 #endif
